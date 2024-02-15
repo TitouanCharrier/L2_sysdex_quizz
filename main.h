@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-//#include <assert.h>
+#include <assert.h>
 #include <ncurses.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <string.h>
 #include <time.h>
+#include <locale.h>
+#include <signal.h>
 
 typedef struct Question {
   int q_id;

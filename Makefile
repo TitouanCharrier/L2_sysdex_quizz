@@ -1,9 +1,12 @@
-
+#généré en partie par chat-gpt
 # Nom du programme final
 PROG_NAME = main
 
 # Compilateur
 CC = gcc
+
+#Option de liens
+LDFLAGS = -lncurses
 
 # Options de compilation
 CFLAGS = -Wall -Wextra -std=c99
@@ -23,7 +26,7 @@ all: $(PROG_NAME)
 
 # Création de l'exécutable
 $(PROG_NAME): $(OBJS)
-	$(CC) $(OBJS) -o $(PROG_NAME)
+	$(CC) $(OBJS) -o $(PROG_NAME) $(LDFLAGS)
 
 # Nettoyage des fichiers intermédiaires et de l'exécutable
 clean:
