@@ -37,6 +37,6 @@ typedef struct Entry {
   Answer aList[10];
 } Entry;
 
-void startFather();
+void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int pipefd[], int nQues, int nAns);
 void mainSon(int pipefd[]);
 
