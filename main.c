@@ -38,37 +38,52 @@ int main(int argc, char *argv[]) {
 
    initscr();
 
-    int height, width;
-    getmaxyx(stdscr, height, width);
-    
-    int bh = height/10;
-    int bw = width/4;
-
-    WINDOW* mainwin = newwin(height -1, width -1, 1, 1);
-
-    WINDOW* questwin = newwin(bh, width/2, bh, width/4);
-
-    WINDOW* answin1 = newwin(height/10, width/3, 3 * bh , width/6);
-    WINDOW* answin2 = newwin(height/10, width/3, 3 * bh , 3 * width/6);
-    WINDOW* answin3 = newwin(height/10, width/3, 4 * bh , width/6);
-    WINDOW* answin4 = newwin(height/10, width/3, 4 * bh , 3 * width/6);
-
-    WINDOW* buttonA = newwin(bh, bw, 6 * bh, 1 * bw);
-    WINDOW* buttonB = newwin(bh, bw, 6 * bh, 1 * bw);
-    WINDOW* buttonC = newwin(bh, bw, 6 * bh, 1 * bw);
-    WINDOW* buttonD = newwin(bh, bw, 6 * bh, 2 * bw);
-
-    noecho();
+   noecho();
     curs_set(0);
+    
+    //calcul des bords de l'écran et 
+    int HEIGHT, WIDTH;
+    getmaxyx(stdscr, HEIGHT, WIDTH);
+    
+    const BH = HEIGHT/10;
+    const BW = WIDTH/4;
+    const AW = WIDTH/3;
+    
 
-    mvwprintw(mainwin, height / 8, (width - 20) / 2, "Bienvenue Dans le QUIZZ");
-    mvwprintw(mainwin, (height / 8) +1, (width - 20) / 2, "    faites vos choix");
+    //définition et placement des fenètres ---------------------------------------
+    WINDOW* mainwin = newwin(HEIGHT -1, WIDTH -1, 1, 1);
 
-    mvwprintw(buttonA, bh/2, bw/2-4, "Bouton A");
-    box(buttonA,0,0);
+    WINDOW* questwin = newwin(BH, WIDTH/2, BH, WIDTH/4);
 
-    mvwprintw(buttonB, bh/2, bw/2-4, "Bouton B");
-    box(buttonB,0,0);
+    WINDOW* answin1 = newwin(BH, AW, 3 * BH , WIDTH/6);
+    WINDOW* answin2 = newwin(BH, AW, 3 * BH , 3 * WIDTH/6);
+    WINDOW* answin3 = newwin(BH, AW, 4 * BH , WIDTH/6);
+    WINDOW* answin4 = newwin(BH, AW, 4 * BH , 3 * WIDTH/6);
+
+    WINDOW* buttonA = newwin(BH, BW, 6 * BH, 2);
+    WINDOW* buttonB = newwin(BH, BW, 6 * BH, 1 * BW);
+    WINDOW* buttonC = newwin(BH, BW, 6 * BH, 2 * BW);
+    WINDOW* buttonD = newwin(BH, BW, 6 * BH, 3 * BW - 1);
+
+   
+
+    // Afficher les textes --------------------------------------------------------
+    mvwprintw(mainwin, HEIGHT / 8, (WIDTH - 20) / 2, "Bienvenue Dans le QUIZZ");
+    mvwprintw(mainwin, (HEIGHT / 8) +1, (WIDTH - 20) / 2, "    faites vos choix");
+
+    mvwprintw(answin1, BH/2, AW/2-4, "Bouton A");
+    mvwprintw(answin2, BH/2, AW/2-4, "Bouton A");
+    mvwprintw(answin3, BH/2, AW/2-4, "Bouton A");
+    mvwprintw(answin4, BH/2, AW/2-4, "Bouton A");
+
+    mvwprintw(buttonA, BH/2, BW/2, "A");
+    mvwprintw(buttonB, BH/2, BW/2, "B");
+    mvwprintw(buttonC, BH/2, BW/2, "C");
+    mvwprintw(buttonD, BH/2, BW/2, "D");
+    
+    
+    // Afficher les box --------------------------------------------------------
+    box(mainwin, 0, 0); 
 
     box(questwin,0,0);
 
@@ -77,12 +92,12 @@ int main(int argc, char *argv[]) {
     box(answin3,0,0);
     box(answin4,0,0);
 
+    box(buttonA,0,0);
+    box(buttonB,0,0);
     box(buttonC,0,0);
     box(buttonD,0,0);
 
-    
-    //affichage de la bordure, le refresh() est REQUIS
-    box(mainwin, 0, 0); 
+    //permet l'affichage tu texte et des box 
     refresh();
 
     wrefresh(mainwin);

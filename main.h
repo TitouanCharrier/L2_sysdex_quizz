@@ -9,6 +9,16 @@
 #include <locale.h>
 #include <signal.h>
 
+typedef struct ToPrint {
+  int quesType;
+  char* question;
+  char* answer1;
+  char* answer2;
+  char* answer3;
+  char* answer4;
+  char* trueansw;
+} ToPrint;
+
 typedef struct Question {
   int q_id;
   char* body;
