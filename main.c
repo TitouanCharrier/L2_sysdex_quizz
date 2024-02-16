@@ -123,7 +123,6 @@ int main(int argc, char *argv[]) {
   //------------------------------------ Fin de la mise en page ncurses --------------------------- 
 
   
-  //printf("pointeur père : %p\n", mainEntry);  
   printf("debug Fin père\n");
  
   }

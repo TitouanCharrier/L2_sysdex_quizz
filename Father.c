@@ -1,53 +1,39 @@
 #include "main.h"
 
 // Fonction pour changer la couleur du texte d'un bouton
-void reverseColor(WINDOW* buttonwin, char* text, const BH, const BW) {
+void drawButton(WINDOW* buttonwin, char* text, const BH, const BW, bool reverse) {
 
-    wattron(buttonwin, A_REVERSE); //active le surlignage
-    mvwprintw(buttonwin, BH/2, BW/2 - (strlen(text)/2), ("%s", text));
-    wattroff(buttonwin, A_REVERSE);
-
-    wrefresh(buttonwin);
-}
-
-// Fonction pour changer la couleur du texte d'un bouton
-void restoreColor(WINDOW* buttonwin, char* text, const BH, const BW) {
-
-    wattron(buttonwin, COLOR_PAIR(1)); //active le surlignage
-    mvwprintw(buttonwin, BH/2, BW/2 - (strlen(text)/2), ("%s", text));
-    wattroff(buttonwin, COLOR_PAIR(1));
+    wclear(buttonwin);
+    box(buttonwin, 0, 0);
+    if(reverse) wattron(buttonwin, A_REVERSE);
+    mvwprintw(buttonwin, BH/2, BW/2 - (strlen(text)/2), text);
+    if (reverse) wattroff(buttonwin, A_REVERSE);
 
     wrefresh(buttonwin);
 }
 
-void reverseButtons(WINDOW* buttonList[], int state, const BH, const BW, char* text) {
-  reverseColor(buttonList[state], ("%s", text ), BH, BW);
-}
+void initWin(WINDOW* questwin, WINDOW* buttonList[], ToPrint print, const BH, const BW) {
 
-void restoreButtons(WINDOW* buttonList[], int state, const BH, const BW) {
-  switch (state) {
-    case 1 :
-      restoreColor(buttonList[0], "Answer A", BH, BW);
-      break;
-    case 2 :
-      restoreColor(buttonList[1], "Answer B", BH, BW);
-      break;  
-    case 3 :
-      restoreColor(buttonList[2], "Answer C", BH, BW);
-      break;  
-    case 4 :
-      restoreColor(buttonList[3], "Answer D", BH, BW);
-      break;
-  }
-}
+  mvwprintw(questwin, BH/2, BW - (strlen(print.question)/2), print.question);
+  box(questwin, 0,0);
+  wrefresh(questwin);
+  printf("question : %s\n", print.question);
 
+  drawButton(buttonList[0], print.answer1, BH, BW, 0);
+  drawButton(buttonList[1], print.answer2, BH, BW, 0);
+  drawButton(buttonList[2], print.answer3, BH, BW, 0);
+  drawButton(buttonList[3], print.answer4, BH, BW, 0);
+
+  refresh();
+}
 
 void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int toPrintPipe[], int nQues, int nAns) {  
   
   init_pair(1, COLOR_WHITE, COLOR_BLACK);
+  init_pair(2, COLOR_BLUE, COLOR_RED);
 
   int state =1;
-  int state_old;
+  int state_old=1;
   
   const BH = HEIGHT/10; //Button Height
   const BW = WIDTH/4; //Button Width
@@ -56,7 +42,7 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int to
   ToPrint print;
 
   close(toPrintPipe[1]);
-  read(toPrintPipe[0], &print, sizeof(Entry));
+  read(toPrintPipe[0], &print, sizeof(ToPrint));
   
   //définition et placement des fenètres ---------------------------------------
   WINDOW* questwin = newwin(2*BH, WIDTH/2, BH, WIDTH/4);
@@ -68,54 +54,27 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int to
 
   WINDOW* buttonList[4] = {buttonA, buttonB, buttonC, buttonD};
 
-  // Afficher les textes --------------------------------------------------------
-  mvwprintw(questwin, BH/2, BW/2 - (strlen(print.question)/2), print.question);
-  mvwprintw(buttonA, BH/2, BW/2, print.answer1);
-  mvwprintw(buttonB, BH/2, BW/2, print.answer2);
-  
-  
-  // Afficher les box --------------------------------------------------------
-  box(questwin,0,0);
+  char* listAttribute[4] = {print.answer1, print.answer2, print.answer3, print.answer4};
 
-  box(buttonA,0,0);
-  box(buttonB,0,0);
-
-  //permet l'affichage tu texte et des box 
+  initWin(questwin, buttonList, print, BH, BW);
+  
   refresh();
 
-  wrefresh(mainwin);
-  wrefresh(questwin);
- 
-  wrefresh(buttonA);
-  wrefresh(buttonB);
-  
-  if (nAns == 3 || nAns == 4) {
-    mvwprintw(buttonC, BH/2, BW/2, print.answer3);
-    box(buttonC,0,0);
-    refresh();
-    wrefresh(buttonC);
-  }
-  if (nAns == 4) {
-    mvwprintw(buttonD, BH/2, BW/2, print.answer4);
-    box(buttonD,0,0);
-    refresh();
-    wrefresh(buttonD);
-  }
-  cbreak;
-  keypad(stdscr, TRUE);
-
-
-
-  int ch;
-  while ((ch = getch()) != 'q' ) {
+  int ch = -1;
+  do {
     switch (ch) {
+      
+      case -1 :
+        
+        initWin(questwin, buttonList, print, BH, BW);
+        break;
 
       case KEY_RIGHT :
         if (state < nAns) {
           state_old = state;
           state ++;
-          restoreButtons(buttonList, state_old, BH, BW);
-          reverseButtons(buttonList, state, BH, BW, "mouai...");
+          drawButton(buttonList[state_old-1], listAttribute[state_old-1], BH, BW, 0);
+          drawButton(buttonList[state-1], listAttribute[state-1], BH, BW, 1);
         }
         break;
 
@@ -123,17 +82,47 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int to
         if (state > 1) {
           state_old = state;
           state --;
-          restoreButtons(buttonList, state_old, BH, BW);
-          reverseButtons(buttonList, state, BH, BW, "testons ce truc");
+          drawButton(buttonList[state_old-1], listAttribute[state_old-1], BH, BW, 0);
+          drawButton(buttonList[state-1], listAttribute[state-1], BH, BW, 1);
         }
         break;
       
       case KEY_ENTER :
         close(statePipe[0]);
-        write(statePipe[1], state, sizeof(int));
+        write(statePipe[1], &state, sizeof(int));
         close(statePipe[1]);
+
+      default: break;
+    } 
+
+    
+      
+    // Afficher les textes --------------------------------------------------------
+    //mvwprintw(questwin, BH/2, BW/2 - (strlen(print.question)/2), print.question);
+    
+    // Afficher les box --------------------------------------------------------
+    //box(questwin,0,0);
+
+    //box(buttonA,0,0);
+    //box(buttonB,0,0);
+
+    //permet l'affichage tu texte et des box 
+    /*if (nAns == 3 || nAns == 4) {
+      mvwprintw(buttonC, BH/2, BW/2, print.answer3);
+      box(buttonC,0,0);
+      refresh();
+      wrefresh(buttonC);
     }
-  }
+    if (nAns == 4) {
+      mvwprintw(buttonD, BH/2, BW/2, print.answer4);
+      box(buttonD,0,0);
+      refresh();
+      wrefresh(buttonD);
+    }*/
+    cbreak;
+    keypad(stdscr, TRUE);
+
+  } while ((ch = getch()) != 'q' );
   
   endwin();
 
