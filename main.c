@@ -8,7 +8,8 @@ int main(int argc, char *argv[]) {
   setlocale(LC_ALL, "fr_FR.UTF-8");
   
   //Définition des variables principales
-  int pipefd[2]; //pipe file descriptor
+  int statePipe[2]; //pipe file descriptor
+  int toPrintPipe[2]; //pipe file descriptor
   int nQues;
   int nAns = 2;
 
@@ -70,11 +71,16 @@ int main(int argc, char *argv[]) {
 
   
   //initialisation du pipe
-  if (pipe(pipefd) == -1) {
+  if (pipe(toPrintPipe) == -1) {
     perror("Erreur lors du pipe\n");
     exit(EXIT_FAILURE);
   }
   
+  if (pipe(statePipe) == -1) {
+    perror("Erreur lors du pipe\n");
+    exit(EXIT_FAILURE);
+  }
+
   //initialisation du fork
   pid_t filsPid;
   filsPid = fork();
@@ -87,7 +93,7 @@ int main(int argc, char *argv[]) {
 
   // Code du fils
   else if (filsPid == 0) {
-    mainSon(pipefd); 
+    mainSon(statePipe, toPrintPipe); 
   
   } 
 
@@ -112,14 +118,14 @@ int main(int argc, char *argv[]) {
   box(mainwin, 0, 0); 
 
 
-  mainFather(mainwin, HEIGHT, WIDTH, pipefd, 10, nAns);
+  mainFather(mainwin, HEIGHT, WIDTH, statePipe, toPrintPipe, 10, nAns);
 
   //------------------------------------ Fin de la mise en page ncurses --------------------------- 
 
   Entry mainEntry;
 
-  close(pipefd[1]);
-  read(pipefd[0], &mainEntry, sizeof(Entry));
+  close(toPrintPipe[1]);
+  read(toPrintPipe[0], &mainEntry, sizeof(Entry));
   
   //printf("pointeur père : %p\n", mainEntry);  
   printf("test père : %s\n", mainEntry.qList[0].body);

@@ -1,7 +1,7 @@
 #include "main.h"
 
 
-void mainSon(int pipefd[]) {
+void mainSon(int statePipe[], int toPrintPipe[]) {
   
   Entry mainEntry;
   mainEntry.qList;
@@ -60,9 +60,9 @@ void mainSon(int pipefd[]) {
   mainEntry.qList[9] = question10;
 
 
-  close(pipefd[0]);
-  write(pipefd[1], &mainEntry, sizeof(Entry));
-  close(pipefd[1]);
+  close(toPrintPipe[0]);
+  write(toPrintPipe[1], &mainEntry, sizeof(Entry));
+  close(toPrintPipe[1]);
 
   printf("test fils : %s\n", mainEntry.qList[0].body);  
 
