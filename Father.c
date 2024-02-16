@@ -20,21 +20,8 @@ void restoreColor(WINDOW* buttonwin, char* text, const BH, const BW) {
     wrefresh(buttonwin);
 }
 
-void reverseButtons(WINDOW* buttonList[], int state, const BH, const BW) {
-  switch (state) {
-    case 1 :
-      reverseColor(buttonList[0], "Answer A", BH, BW);
-      break;
-    case 2 :
-      reverseColor(buttonList[1], "Answer B", BH, BW);
-      break;  
-    case 3 :
-      reverseColor(buttonList[2], "Answer C", BH, BW);
-      break;  
-    case 4 :
-      reverseColor(buttonList[3], "Answer D", BH, BW);
-      break;
-  }
+void reverseButtons(WINDOW* buttonList[], int state, const BH, const BW, char* text) {
+  reverseColor(buttonList[state], ("%s", text ), BH, BW);
 }
 
 void restoreButtons(WINDOW* buttonList[], int state, const BH, const BW) {
@@ -65,34 +52,30 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int to
   const BH = HEIGHT/10; //Button Height
   const BW = WIDTH/4; //Button Width
   const AW = WIDTH/3; //Answer Width
+
+  ToPrint print;
+
+  close(toPrintPipe[1]);
+  read(toPrintPipe[0], &print, sizeof(Entry));
   
   //définition et placement des fenètres ---------------------------------------
-  WINDOW* questwin = newwin(BH, WIDTH/2, BH, WIDTH/4);
+  WINDOW* questwin = newwin(2*BH, WIDTH/2, BH, WIDTH/4);
 
-  WINDOW* answin1 = newwin(BH, AW, 3 * BH , WIDTH/6);
-  WINDOW* answin2 = newwin(BH, AW, 3 * BH , 3 * WIDTH/6);
-  WINDOW* answin3 = newwin(BH, AW, 4 * BH , WIDTH/6);
-  WINDOW* answin4 = newwin(BH, AW, 4 * BH , 3 * WIDTH/6);
-  WINDOW* buttonA = newwin(BH, BW, 6 * BH, 2);
-  WINDOW* buttonB = newwin(BH, BW, 6 * BH, 1 * BW - 1);
-  WINDOW* buttonC = newwin(BH, BW, 6 * BH, 2 * BW - 1 );
-  WINDOW* buttonD = newwin(BH, BW, 6 * BH, 3 * BW - 1);
+  WINDOW* buttonA = newwin(3*BH, AW, 4 * BH , WIDTH/6);
+  WINDOW* buttonB = newwin(3*BH, AW, 4 * BH , 3 * WIDTH/6);
+  WINDOW* buttonC = newwin(3*BH, AW, 7 * BH , WIDTH/6);
+  WINDOW* buttonD = newwin(3*BH, AW, 7 * BH , 3 * WIDTH/6);
 
   WINDOW* buttonList[4] = {buttonA, buttonB, buttonC, buttonD};
 
   // Afficher les textes --------------------------------------------------------
-  mvwprintw(answin1, BH/2, AW/2-4, "Bouton A");
-  mvwprintw(answin2, BH/2, AW/2-4, "Bouton A");
-
-  mvwprintw(buttonA, BH/2, BW/2, "A");
-  mvwprintw(buttonB, BH/2, BW/2, "B");
+  mvwprintw(questwin, BH/2, BW/2 - (strlen(print.question)/2), print.question);
+  mvwprintw(buttonA, BH/2, BW/2, print.answer1);
+  mvwprintw(buttonB, BH/2, BW/2, print.answer2);
   
   
   // Afficher les box --------------------------------------------------------
   box(questwin,0,0);
-
-  box(answin1,0,0);
-  box(answin2,0,0);
 
   box(buttonA,0,0);
   box(buttonB,0,0);
@@ -102,28 +85,20 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int to
 
   wrefresh(mainwin);
   wrefresh(questwin);
-  wrefresh(answin1);
-  wrefresh(answin2);
  
   wrefresh(buttonA);
   wrefresh(buttonB);
   
   if (nAns == 3 || nAns == 4) {
-    mvwprintw(answin3, BH/2, AW/2-4, "Bouton A");
-    mvwprintw(buttonC, BH/2, BW/2, "C");
-    box(answin3,0,0);
+    mvwprintw(buttonC, BH/2, BW/2, print.answer3);
     box(buttonC,0,0);
     refresh();
-    wrefresh(answin3);
     wrefresh(buttonC);
   }
   if (nAns == 4) {
-    mvwprintw(answin4, BH/2, AW/2-4, "Bouton A");
-    mvwprintw(buttonD, BH/2, BW/2, "D");
-    box(answin4,0,0);
+    mvwprintw(buttonD, BH/2, BW/2, print.answer4);
     box(buttonD,0,0);
     refresh();
-    wrefresh(answin4);
     wrefresh(buttonD);
   }
   cbreak;
@@ -140,7 +115,7 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int to
           state_old = state;
           state ++;
           restoreButtons(buttonList, state_old, BH, BW);
-          reverseButtons(buttonList, state, BH, BW);
+          reverseButtons(buttonList, state, BH, BW, "mouai...");
         }
         break;
 
@@ -149,7 +124,7 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int to
           state_old = state;
           state --;
           restoreButtons(buttonList, state_old, BH, BW);
-          reverseButtons(buttonList, state, BH, BW);
+          reverseButtons(buttonList, state, BH, BW, "testons ce truc");
         }
         break;
       

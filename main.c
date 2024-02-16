@@ -122,13 +122,8 @@ int main(int argc, char *argv[]) {
 
   //------------------------------------ Fin de la mise en page ncurses --------------------------- 
 
-  Entry mainEntry;
-
-  close(toPrintPipe[1]);
-  read(toPrintPipe[0], &mainEntry, sizeof(Entry));
   
   //printf("pointeur père : %p\n", mainEntry);  
-  printf("test père : %s\n", mainEntry.qList[0].body);
   printf("debug Fin père\n");
  
   }

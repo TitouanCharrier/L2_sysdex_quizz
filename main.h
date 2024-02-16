@@ -10,13 +10,12 @@
 #include <signal.h>
 
 typedef struct ToPrint {
-  int quesType;
   char* question;
   char* answer1;
   char* answer2;
   char* answer3;
   char* answer4;
-  char* trueansw;
+  int goodState;
 } ToPrint;
 
 typedef struct Question {
