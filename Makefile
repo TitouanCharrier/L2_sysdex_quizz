@@ -9,7 +9,7 @@ CC = gcc
 LDFLAGS = -lncurses
 
 # Options de compilation
-CFLAGS = -Wall -Wextra -std=c99
+CFLAGS = -g -Wall -Wextra -std=c99
 
 # Listes des fichiers sources
 SRCS = Father.c Son.c main.c
@@ -31,3 +31,4 @@ $(PROG_NAME): $(OBJS)
 # Nettoyage des fichiers intermédiaires et de l'exécutable
 clean:
 	rm -f $(OBJS) $(PROG_NAME)
+	rm -f *.log

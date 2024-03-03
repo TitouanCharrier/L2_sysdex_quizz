@@ -1,7 +1,11 @@
 #include "main.h"
 
+void mainSon(int statePipe[], int toPrintPipe[], int* mainMem, int resultPipe[], int nQues) {
 
-void mainSon(int statePipe[], int toPrintPipe[]) {
+  debug_log("début du fils");
+  //key_t key = ftok(const char ".", int "SysDexTpNote");
+  //int mainMem_v = shmget(key_t key, size_t 1024, IPC_CREAT | 0666);
+  //int* mainMem = shmat(int mainMem_v, const void NULL, int 0);
   
   ToPrint printList[10];
   
@@ -21,7 +25,7 @@ void mainSon(int statePipe[], int toPrintPipe[]) {
   print2.answer3 = "Pacifique";
   print2.answer4 = "Arctique";
   print2.goodState = 3;
-  printList[1] = print1;
+  printList[1] = print2;
 
   ToPrint print3;
   print3.question = "Quelle est la monnaie du Japon ?";
@@ -30,7 +34,7 @@ void mainSon(int statePipe[], int toPrintPipe[]) {
   print3.answer3 = "Euro";
   print3.answer4 = "Livre";
   print3.goodState = 2;
-  printList[2] = print1;
+  printList[2] = print3;
 
   ToPrint print4;
   print4.question = "Quel est le plus grand désert du monde ?";
@@ -39,7 +43,7 @@ void mainSon(int statePipe[], int toPrintPipe[]) {
   print4.answer3 = "Gobi";
   print4.answer4 = "Antarctique";
   print4.goodState = 1;
-  printList[3] = print1;
+  printList[3] = print4;
 
   ToPrint print5;
   print5.question = "Qui a écrit 'Romeo et Juliette' ?";
@@ -48,7 +52,7 @@ void mainSon(int statePipe[], int toPrintPipe[]) {
   print5.answer3 = "Charles Dickens";
   print5.answer4 = "Jane Austen";
   print5.goodState = 1;
-  printList[4] = print1;
+  printList[4] = print5;
 
   ToPrint print6;
   print6.question = "Combien de continents y a-t-il sur Terre ?";
@@ -57,7 +61,7 @@ void mainSon(int statePipe[], int toPrintPipe[]) {
   print6.answer3 = "7";
   print6.answer4 = "9";
   print6.goodState = 3;
-  printList[5] = print1;
+  printList[5] = print6;
 
   ToPrint print7;
   print7.question = "Quel est le plus haut sommet du monde ?";
@@ -66,7 +70,7 @@ void mainSon(int statePipe[], int toPrintPipe[]) {
   print7.answer3 = "K2";
   print7.answer4 = "Matterhorn";
   print7.goodState = 2;
-  printList[6] = print1;
+  printList[6] = print7;
 
   ToPrint print8;
   print8.question = "Qui a peint 'La Joconde' ?";
@@ -75,7 +79,7 @@ void mainSon(int statePipe[], int toPrintPipe[]) {
   print8.answer3 = "Leonardo da Vinci";
   print8.answer4 = "Raphael";
   print8.goodState = 3;
-  printList[7] = print1;
+  printList[7] = print8;
 
   ToPrint print9;
   print9.question = "Quel est le plus long fleuve du monde ?";
@@ -84,7 +88,7 @@ void mainSon(int statePipe[], int toPrintPipe[]) {
   print9.answer3 = "Amazone";
   print9.answer4 = "Yangtsé";
   print9.goodState = 3;
-  printList[8] = print1;
+  printList[8] = print9;
 
   ToPrint print10;
   print10.question = "Quel est l'organe principal du système respiratoire ?";
@@ -93,14 +97,50 @@ void mainSon(int statePipe[], int toPrintPipe[]) {
   print10.answer3 = "Le foie";
   print10.answer4 = "Le cerveau";
   print10.goodState = 2;
-  printList[9] = print1;
+  printList[9] = print10;
 
+  debug_log("le fils est initialisé");
+  int_log("le fils a reçu l'ordre d'éxécuter le nombre de questions", nQues);
 
-  close(toPrintPipe[0]);
-  write(toPrintPipe[1], &printList[2], sizeof(ToPrint));
-  close(toPrintPipe[1]);
+    
+  for (int actualQuestion = 0; actualQuestion<nQues; ++actualQuestion) {
+    debug_log("le fils écrit");
+    //ecrire la question à afficher
+    close(toPrintPipe[0]);
+    write(toPrintPipe[1], &printList[1], sizeof(ToPrint));
+    close(toPrintPipe[1]);
 
+    debug_log("le fils finit d'écrire");
+    sleep(3);
 
+    while (1) {
+      usleep(100000);
+    
+      int state = -1;
+      
+      //lire l'état actuel
+      close(statePipe[1]);
+      read(statePipe[0], &state, sizeof(int));
+    
+      if (state == printList[actualQuestion].goodState) {
+        //ecrire Victoire
+        int victory = 1;
+        close(resultPipe[0]);
+        write(resultPipe[1], &victory, sizeof(int));
+        close(resultPipe[1]);
+      }
+      else {
+        //ecrire Défaite
+        int defeat = 0;
+        close(resultPipe[0]);
+        write(resultPipe[1], &defeat, sizeof(int));
+        close(resultPipe[1]);
+      }
+      break;
 
+    }
+    debug_log("le fils est sorti de la boucle while");
   }
+  debug_log("le fils est sorti de la boucle for");
+}
 

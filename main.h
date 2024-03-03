@@ -8,6 +8,7 @@
 #include <time.h>
 #include <locale.h>
 #include <signal.h>
+#include <sys/shm.h>
 
 typedef struct ToPrint {
   char* question;
@@ -18,6 +19,6 @@ typedef struct ToPrint {
   int goodState;
 } ToPrint;
 
-void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[], int toPrintPipe[], int nQues, int nAns);
-void mainSon(int statePipe[], int toPrintPipe[]);
+void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[], int toPrintPipe[], int resultPipe[], int nQues, int nAns, int* mainMem);
+void mainSon(int statePipe[], int toPrintPipe[], int* mainMem, int resultPipe[], int nQues);
 
