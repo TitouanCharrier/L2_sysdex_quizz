@@ -102,42 +102,60 @@ void mainSon(int statePipe[], int toPrintPipe[], int* mainMem, int resultPipe[],
   debug_log("le fils est initialisé");
   int_log("le fils a reçu l'ordre d'éxécuter le nombre de questions", nQues);
 
-    
+  int state = -1;
+  int check;
+  
   for (int actualQuestion = 0; actualQuestion<nQues; ++actualQuestion) {
+
+    int_log("le fils execute la question numéro : ", actualQuestion);
     debug_log("le fils écrit");
     //ecrire la question à afficher
     close(toPrintPipe[0]);
-    write(toPrintPipe[1], &printList[1], sizeof(ToPrint));
+    check = write(toPrintPipe[1], &printList[actualQuestion], sizeof(ToPrint));
+    int_log("le fils à écrit : ", check);
     close(toPrintPipe[1]);
 
     debug_log("le fils finit d'écrire");
-    sleep(3);
+    debug_log(printList[actualQuestion].question);
 
     while (1) {
       usleep(100000);
     
-      int state = -1;
-      
       //lire l'état actuel
       close(statePipe[1]);
       read(statePipe[0], &state, sizeof(int));
+      close(statePipe[0]);
     
       if (state == printList[actualQuestion].goodState) {
         //ecrire Victoire
         int victory = 1;
+        state = -1;
+
         close(resultPipe[0]);
         write(resultPipe[1], &victory, sizeof(int));
         close(resultPipe[1]);
+
+        close(statePipe[0]);
+        write(statePipe[1], &state, sizeof(int));
+        close(statePipe[1]);
+        break;
       }
-      else {
+      else if(state != -1) {
         //ecrire Défaite
         int defeat = 0;
+        state = -1;
+
         close(resultPipe[0]);
         write(resultPipe[1], &defeat, sizeof(int));
         close(resultPipe[1]);
-      }
-      break;
 
+        close(statePipe[0]);
+        write(statePipe[1], &state, sizeof(int));
+        close(statePipe[1]);
+
+        break;
+
+      }
     }
     debug_log("le fils est sorti de la boucle while");
   }
