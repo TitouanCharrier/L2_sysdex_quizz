@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+// fonction de débug générée par ia
 void int_log(const char *message, int value) {
     FILE *file = fopen("debug.log", "a"); // Ouvre le fichier en mode ajout
     if (file != NULL) {
@@ -61,7 +62,7 @@ void resultWin(WINDOW* questwin, int BH, int BW, bool result) {
 
 }
 
-void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int toPrintPipe[], int resultPipe[], int nQues, int nAns, int* mainMem) {  
+void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int nQues, int nAns, int* mainMem) {  
   
   start_color(); 
   init_pair(1, COLOR_WHITE, COLOR_BLACK);
@@ -91,12 +92,6 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int to
   
   int check;
 
-  debug_log("lecture du print initial par le père");
-  close(toPrintPipe[1]);
-  check = read(toPrintPipe[0], &print, sizeof(ToPrint));
-  int_log("le père à lu initialement : ", check);
-  close(toPrintPipe[0]);
-
   //définition et placement des fenètres ---------------------------------------
   WINDOW* questwin = newwin(2*BH, WIDTH/2, BH, WIDTH/4);
 
@@ -107,31 +102,43 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int to
 
   WINDOW* buttonList[4] = {buttonA, buttonB, buttonC, buttonD};
   
-  char* listAttribute[4] = {print.answer1, print.answer2, print.answer3, print.answer4};
   
-  //initialisation de la fenètre
-  //initWin(questwin, buttonList, print, BH, BW, nAns);
   bkgd(COLOR_PAIR(2));
   refresh();
 
+  int toPrintPipe;
+  int statePipe;
+  int resultPipe;
+
+  int actualResult;
+
   int ch = -1;
   do {
+    //sleep(1);
+    int check;
 
     //lire le print
     debug_log("lecture du print par le père");
-    close(toPrintPipe[1]);
-    check = read(toPrintPipe[0], &print, sizeof(ToPrint));
-    close(toPrintPipe[0]);
-    int_log("le père à lu : ", check);
+    toPrintPipe = open(PIPE_PRINT, O_RDONLY);
+    int_log("le père à ouvert le print : ", check);
+    check = read(toPrintPipe, &print, sizeof(ToPrint));
+    int_log("le père à lu le print : ", check);
+    check = close(toPrintPipe);
+    int_log("le père à fermé le print : ", check);
     debug_log(print.question);
 
-    debug_log("affichage de la question");
-    initWin(questwin, buttonList, print, BH, BW, nAns);
-    refresh();
+        char* listAttribute[4] = {print.answer1, print.answer2, print.answer3, print.answer4};
 
     switch (ch) {
-      
+      case -1 :
+        debug_log("affichage initial");
+        initWin(questwin, buttonList, print, BH, BW, nAns);
+        refresh();
+        break;
+
+ 
       case KEY_RIGHT :
+        debug_log("flèche droite enfoncé");
         if (state < nAns) {
           state_old = state;
           state ++;
@@ -141,6 +148,7 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int to
         break;
 
       case KEY_LEFT :
+        debug_log("flèche gauche enfoncé");
         if (state > 1) {
           state_old = state;
           state --;
@@ -150,16 +158,19 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int to
         break;
       
       case '\n' :
+        debug_log("Entrée enfoncé");
         //envoyer la réponse dans le tube state 
-        close(statePipe[0]);
-        write(statePipe[1], &state, sizeof(int));
-        close(statePipe[1]);
+        statePipe = open(PIPE_STATE, O_WRONLY);
+        write(statePipe, &state, sizeof(int));
+        close(statePipe);
         
         //lire la fenetre a afficher
-        int actualResult;
-        close(resultPipe[1]);
-        read(resultPipe[0], &actualResult, sizeof(int));
-        close(resultPipe[0]);
+        resultPipe = open(PIPE_STATE, O_RDONLY);
+        int_log("père ouvre le state : ", resultPipe); 
+        actualResult;
+        check = read(resultPipe, &actualResult, sizeof(int));
+        int_log("père lit le state : ", check); 
+        close(resultPipe);
 
         resultWin(questwin, BH, BW, actualResult); 
 
@@ -173,7 +184,7 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[],  int to
     keypad(stdscr, TRUE);
 
   } while ((ch = getch()) != 'q' );
-  
+
   endwin();
    
 }

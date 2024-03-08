@@ -1,8 +1,12 @@
 #include "main.h"
 
-void mainSon(int statePipe[], int toPrintPipe[], int* mainMem, int resultPipe[], int nQues) {
+void mainSon(int* mainMem, int nQues) {
 
   debug_log("début du fils");
+
+  int toPrintPipe;
+  int statePipe;
+  int resultPipe;
   //key_t key = ftok(const char ".", int "SysDexTpNote");
   //int mainMem_v = shmget(key_t key, size_t 1024, IPC_CREAT | 0666);
   //int* mainMem = shmat(int mainMem_v, const void NULL, int 0);
@@ -101,57 +105,56 @@ void mainSon(int statePipe[], int toPrintPipe[], int* mainMem, int resultPipe[],
 
   debug_log("le fils est initialisé");
   int_log("le fils a reçu l'ordre d'éxécuter le nombre de questions", nQues);
-
+  
+  int victory;
   int state = -1;
   int check;
-  
+
   for (int actualQuestion = 0; actualQuestion<nQues; ++actualQuestion) {
 
     int_log("le fils execute la question numéro : ", actualQuestion);
     debug_log("le fils écrit");
     //ecrire la question à afficher
-    close(toPrintPipe[0]);
-    check = write(toPrintPipe[1], &printList[actualQuestion], sizeof(ToPrint));
-    int_log("le fils à écrit : ", check);
-    close(toPrintPipe[1]);
+    toPrintPipe = open(PIPE_PRINT, O_WRONLY);
+    check = write(toPrintPipe, &printList[actualQuestion], sizeof(ToPrint));
+    int_log("le fils à ouvert le print: ", toPrintPipe);
+    int_log("le fils à écrit le print: ", check);
+    close(toPrintPipe);
 
     debug_log("le fils finit d'écrire");
     debug_log(printList[actualQuestion].question);
 
     while (1) {
       usleep(100000);
+      debug_log("début de la boucle du fils");
     
       //lire l'état actuel
-      close(statePipe[1]);
-      read(statePipe[0], &state, sizeof(int));
-      close(statePipe[0]);
+      int_log("le fils ouvre le state : ", statePipe = open(PIPE_STATE, O_RDONLY));
+      check = read(statePipe, &state, sizeof(int));
+      int_log("le fils lit le state : ", check);
+      close(statePipe);
     
       if (state == printList[actualQuestion].goodState) {
         //ecrire Victoire
-        int victory = 1;
+        victory = 1;
         state = -1;
-
-        close(resultPipe[0]);
-        write(resultPipe[1], &victory, sizeof(int));
-        close(resultPipe[1]);
-
-        close(statePipe[0]);
-        write(statePipe[1], &state, sizeof(int));
-        close(statePipe[1]);
-        break;
       }
-      else if(state != -1) {
-        //ecrire Défaite
-        int defeat = 0;
+      else {
+        victory = 0;
         state = -1;
+      }
+        
+        resultPipe = open(PIPE_RES, O_WRONLY);
+        int_log("le fils ouvre le result : ", resultPipe);
+        check = write(resultPipe, &victory, sizeof(int));
+        int_log("le fils écrit le result : ", check);
+        close(resultPipe);
 
-        close(resultPipe[0]);
-        write(resultPipe[1], &defeat, sizeof(int));
-        close(resultPipe[1]);
-
-        close(statePipe[0]);
-        write(statePipe[1], &state, sizeof(int));
-        close(statePipe[1]);
+        statePipe = open(PIPE_STATE, O_WRONLY);
+        int_log("le fils ouvre le state : ", statePipe);
+        check = write(statePipe, &state, sizeof(int));
+        int_log("le fils ecrit le state : ", check);
+        close(statePipe);
 
         break;
 

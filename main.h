@@ -4,11 +4,19 @@
 #include <ncurses.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <time.h>
 #include <locale.h>
 #include <signal.h>
 #include <sys/shm.h>
+#include <fcntl.h>
+#include <errno.h>
+
+#define PIPE_SIZE 1000
+#define PIPE_PRINT "./pipefolder/pipe_print"
+#define PIPE_STATE "./pipefolder/pipe_state"
+#define PIPE_RES   "./pipefolder/pipe_res"
 
 typedef struct ToPrint {
   char* question;
@@ -19,6 +27,6 @@ typedef struct ToPrint {
   int goodState;
 } ToPrint;
 
-void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int statePipe[], int toPrintPipe[], int resultPipe[], int nQues, int nAns, int* mainMem);
-void mainSon(int statePipe[], int toPrintPipe[], int* mainMem, int resultPipe[], int nQues);
+void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int nQues, int nAns, int* mainMem);
+void mainSon( int* mainMem, int nQues);
 

@@ -1,24 +1,25 @@
 #include "main.h"
 
-#define PIPE_SIZE 1000
-
 int main(int argc, char *argv[]) {
 
   //Permet l'utilisation de caractères UTF-8
   setlocale(LC_ALL, "fr_FR.UTF-8");
   
+
   //Définition des variables principales
-  int statePipe[2]; //pipe gérant la réponse renvoyé
-  int toPrintPipe[2]; //pipe gérant la question a afficher
-  int resultPipe[2]; //pipe gérant le résultat a afficher
   int nQues= 10;
   int nAns = 2;
-
-  //initialisation du pipe
-  pipe(toPrintPipe); 
-  pipe(statePipe);
-  pipe(resultPipe);
+  int check;
   
+  debug_log("début du programme ----------------------------------------------------------------");
+
+  check = mkfifo(PIPE_PRINT, 0666);
+  int_log("Print Pipe initialisé :", check);
+  check = mkfifo(PIPE_STATE, 0666);
+  int_log("State Pipe initialisé :", check);
+  check = mkfifo(PIPE_RES, 0666);
+  int_log("Res Pipe initialisé :", check);
+   
   //fonction de débug
   for (int i=0; i<argc; ++i) {
     printf("argv %d = %s\n", i, argv[i]);
@@ -72,7 +73,8 @@ int main(int argc, char *argv[]) {
   } 
 
   else {
-    printf("Usage: ./quiz [OPTIONS]...\n Quiz game via IPC.\n\n Options:\n \t\t-h, --help display this help and exit\n \t\t-r, --rules display the rules of the game\n \t\t-s, --student display the name of the students who implemented the game\n \t\t-a, --answers set the number of possible answers (by default 2, max 4)\n \t\t-q, --questions set the number of questions in the quiz (by default 4, max 10)\n WARNING : 2 arguments max, args like -a and -q must be as showned :\n \t\t-a3 -q10\n");
+    printf("Usage: ./quiz [OPTIONS]...\n Quiz game via IPC.\n\n Options:\n \t\t-h, --help display this help and exit\n \t\t-r, --rules display the rules of the game\n \t\t-s, --student display the name of the students who implemented the game\n \t\t-a, --answers set the number of possible answers (by default 2, max 4)\n \t\t-q, --questions set the number of questions in the quiz (by default 4, max 10)\n WARNING: 2 arguments max, args like -a and -q must be as follows :\n \t\t-a3 -q10\n");
+    return 0;
   }
 
   //initialisation du fork
@@ -87,7 +89,9 @@ int main(int argc, char *argv[]) {
 
   // Code du fils
   else if (filsPid == 0) {
-    mainSon(statePipe, toPrintPipe, 0, resultPipe, nQues); 
+
+    mainSon( 0, nQues); 
+
   } 
 
   //Code du père
@@ -110,8 +114,8 @@ int main(int argc, char *argv[]) {
   box(mainwin, 0, 0); 
 
 
-  mainFather(mainwin, HEIGHT, WIDTH, statePipe, toPrintPipe, resultPipe, 10, nAns, 0);
-
+  mainFather(mainwin, HEIGHT, WIDTH, 10, nAns, 0);
+ 
   //------------------------------------ Fin de la mise en page ncurses --------------------------
  
   }
