@@ -143,6 +143,8 @@ void mainSon(int* mainMem, int nQues) {
         victory = 0;
         state = -1;
       }
+
+      if (state != -1) {
         
         resultPipe = open(PIPE_RES, O_WRONLY);
         int_log("le fils ouvre le result : ", resultPipe);
