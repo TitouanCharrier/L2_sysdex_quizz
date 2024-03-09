@@ -109,17 +109,21 @@ void mainSon(int* mainMem, int nQues) {
   int victory;
   int state = -1;
   int check;
+  
+
+  resultPipe = open(PIPE_RES, O_WRONLY);
+  int_log("le fils ouvre le result : ", resultPipe);
+  toPrintPipe = open(PIPE_PRINT, O_WRONLY);
+  int_log("le fils à ouvert le print: ", toPrintPipe);
+  int_log("le fils ouvre le state : ", statePipe = open(PIPE_STATE, O_RDONLY));
 
   for (int actualQuestion = 0; actualQuestion<nQues; ++actualQuestion) {
 
     int_log("le fils execute la question numéro : ", actualQuestion);
     debug_log("le fils écrit");
     //ecrire la question à afficher
-    toPrintPipe = open(PIPE_PRINT, O_WRONLY);
     check = write(toPrintPipe, &printList[actualQuestion], sizeof(ToPrint));
-    int_log("le fils à ouvert le print: ", toPrintPipe);
     int_log("le fils à écrit le print: ", check);
-    close(toPrintPipe);
 
     debug_log("le fils finit d'écrire");
     debug_log(printList[actualQuestion].question);
@@ -129,10 +133,8 @@ void mainSon(int* mainMem, int nQues) {
       debug_log("début de la boucle du fils");
     
       //lire l'état actuel
-      int_log("le fils ouvre le state : ", statePipe = open(PIPE_STATE, O_RDONLY));
       check = read(statePipe, &state, sizeof(int));
       int_log("le fils lit le state : ", check);
-      close(statePipe);
     
       if (state == printList[actualQuestion].goodState) {
         //ecrire Victoire
@@ -146,17 +148,11 @@ void mainSon(int* mainMem, int nQues) {
 
       if (state != -1) {
         
-        resultPipe = open(PIPE_RES, O_WRONLY);
-        int_log("le fils ouvre le result : ", resultPipe);
         check = write(resultPipe, &victory, sizeof(int));
         int_log("le fils écrit le result : ", check);
-        close(resultPipe);
 
-        statePipe = open(PIPE_STATE, O_WRONLY);
-        int_log("le fils ouvre le state : ", statePipe);
         check = write(statePipe, &state, sizeof(int));
         int_log("le fils ecrit le state : ", check);
-        close(statePipe);
 
         break;
 
@@ -165,5 +161,8 @@ void mainSon(int* mainMem, int nQues) {
     debug_log("le fils est sorti de la boucle while");
   }
   debug_log("le fils est sorti de la boucle for");
+  close(toPrintPipe);
+  close(statePipe);
+  close(resultPipe);
 }
 

@@ -90,7 +90,6 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int nQues, int nAns, int
   print.answer4 = "answer erreur";
   print.goodState = 1;
   
-  int check;
 
   //définition et placement des fenètres ---------------------------------------
   WINDOW* questwin = newwin(2*BH, WIDTH/2, BH, WIDTH/4);
@@ -106,25 +105,28 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int nQues, int nAns, int
   bkgd(COLOR_PAIR(2));
   refresh();
 
-  int toPrintPipe;
-  int statePipe;
-  int resultPipe;
+  int toPrintPipe = -100;
+  int statePipe = -100;
+  int resultPipe = -100;
 
-  int actualResult;
+  int check = 0;
+  int actualResult = 0;
+
+  toPrintPipe = open(PIPE_PRINT, O_RDONLY);
+  int_log("le père à ouvert le print : ", toPrintPipe);
+  statePipe = open(PIPE_STATE, O_WRONLY);
+  int_log("le père à ouvert le state : ", toPrintPipe);
+  resultPipe = open(PIPE_RES, O_RDONLY);
+  int_log("le père à ouvert le result : ", toPrintPipe);
 
   int ch = -1;
   do {
     //sleep(1);
-    int check;
 
     //lire le print
     debug_log("lecture du print par le père");
-    toPrintPipe = open(PIPE_PRINT, O_RDONLY);
-    int_log("le père à ouvert le print : ", check);
     check = read(toPrintPipe, &print, sizeof(ToPrint));
     int_log("le père à lu le print : ", check);
-    check = close(toPrintPipe);
-    int_log("le père à fermé le print : ", check);
     debug_log(print.question);
 
         char* listAttribute[4] = {print.answer1, print.answer2, print.answer3, print.answer4};
@@ -160,16 +162,12 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int nQues, int nAns, int
       case '\n' :
         debug_log("Entrée enfoncé");
         //envoyer la réponse dans le tube state 
-        statePipe = open(PIPE_STATE, O_WRONLY);
-        write(statePipe, &state, sizeof(int));
-        close(statePipe);
+        check = write(statePipe, &state, sizeof(int));
+        int_log("le père à écrit le state : ", check);
         
         //lire la fenetre a afficher
-        resultPipe = open(PIPE_STATE, O_RDONLY);
-        int_log("père ouvre le state : ", resultPipe); 
-        actualResult;
         check = read(resultPipe, &actualResult, sizeof(int));
-        int_log("père lit le state : ", check); 
+        int_log("le père lit le state : ", check); 
         close(resultPipe);
 
         resultWin(questwin, BH, BW, actualResult); 
@@ -184,6 +182,11 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int nQues, int nAns, int
     keypad(stdscr, TRUE);
 
   } while ((ch = getch()) != 'q' );
+  
+  check = close(toPrintPipe);
+  int_log("le père à fermé le print : ", check);
+  close(statePipe);
+  close(resultPipe);
 
   endwin();
    
