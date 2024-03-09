@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <ncurses.h>
+#include "lib/ncurses.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
