@@ -27,8 +27,9 @@ all: $(PROG_NAME)
 # Création de l'exécutable
 $(PROG_NAME): $(OBJS)
 	$(CC) $(OBJS) -o $(PROG_NAME) $(LDFLAGS)
+	rm -f debug.log ./pipefolder/pipe_res ./pipefolder/pipe_print ./pipefolder/pipe_state
+
 
 # Nettoyage des fichiers intermédiaires et de l'exécutable
 clean:
 	rm -f $(OBJS) $(PROG_NAME)
-	rm -f *.log

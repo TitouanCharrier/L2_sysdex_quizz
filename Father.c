@@ -4,7 +4,7 @@
 
 // fonction de débug générée par ia
 void int_log(const char *message, int value) {
-    FILE *file = fopen("debug.log", "a"); // Ouvre le fichier en mode ajout
+    FILE *file = fopen("debug.log", "a"); // Ouvre le fichier en mode write
     if (file != NULL) {
         fprintf(file, "%s %d\n", message, value); // Écrit le message et l'entier dans le fichier
         fclose(file); // Ferme le fichier
@@ -105,45 +105,41 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int nQues, int nAns, int
   bkgd(COLOR_PAIR(2));
   refresh();
 
-  int toPrintPipe = -100;
-  int statePipe = -100;
-  int resultPipe = -100;
-
   int check = 0;
   int actualResult = 0;
-
-  toPrintPipe = open(PIPE_PRINT, O_RDONLY);
+  int toPrintPipe = open(PIPE_PRINT, O_RDONLY);
   int_log("le père à ouvert le print : ", toPrintPipe);
-  statePipe = open(PIPE_STATE, O_WRONLY);
+  int statePipe = open(PIPE_STATE, O_WRONLY);
   int_log("le père à ouvert le state : ", toPrintPipe);
-  resultPipe = open(PIPE_RES, O_RDONLY);
+  int resultPipe = open(PIPE_RES, O_RDONLY);
   int_log("le père à ouvert le result : ", toPrintPipe);
 
   int ch = -1;
+  int qCount = 0;
+
   do {
-    //sleep(1);
+    
+    if (ch == -1) { //lire le print
+      debug_log("lecture du print par le père");
+      check = read(toPrintPipe, &print, sizeof(ToPrint));
+      int_log("le père à lu le print : ", check);
+      debug_log(print.question);
 
-    //lire le print
-    debug_log("lecture du print par le père");
-    check = read(toPrintPipe, &print, sizeof(ToPrint));
-    int_log("le père à lu le print : ", check);
-    debug_log(print.question);
+    }      
 
-        char* listAttribute[4] = {print.answer1, print.answer2, print.answer3, print.answer4};
+    initWin(questwin, buttonList, print, BH, BW, nAns);
+    refresh();
+
+    char* listAttribute[4] = {print.answer1, print.answer2, print.answer3, print.answer4};
 
     switch (ch) {
-      case -1 :
-        debug_log("affichage initial");
-        initWin(questwin, buttonList, print, BH, BW, nAns);
-        refresh();
-        break;
-
  
       case KEY_RIGHT :
         debug_log("flèche droite enfoncé");
         if (state < nAns) {
           state_old = state;
           state ++;
+          initWin(questwin, buttonList, print, BH, BW, nAns);
           drawButton(buttonList[state_old-1], listAttribute[state_old-1], BH, BW, 0);
           drawButton(buttonList[state-1], listAttribute[state-1], BH, BW, 1);
         }
@@ -154,35 +150,54 @@ void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int nQues, int nAns, int
         if (state > 1) {
           state_old = state;
           state --;
+          initWin(questwin, buttonList, print, BH, BW, nAns);
           drawButton(buttonList[state_old-1], listAttribute[state_old-1], BH, BW, 0);
           drawButton(buttonList[state-1], listAttribute[state-1], BH, BW, 1);
         }
         break;
       
       case '\n' :
+        qCount ++;
         debug_log("Entrée enfoncé");
         //envoyer la réponse dans le tube state 
         check = write(statePipe, &state, sizeof(int));
         int_log("le père à écrit le state : ", check);
         
         //lire la fenetre a afficher
-        check = read(resultPipe, &actualResult, sizeof(int));
-        int_log("le père lit le state : ", check); 
-        close(resultPipe);
+        check = read(resultPipe, &actualResult, sizeof(int)); //bloquant
+        int_log("le père lit le result : ", check); 
 
         resultWin(questwin, BH, BW, actualResult); 
+
+        debug_log("lecture du print par le père lors de Entrée");
+        check = read(toPrintPipe, &print, sizeof(ToPrint));
+        int_log("le père à lu le print lors de Entrée: ", check);
+        if (check == 0) {
+          debug_log("erreur lors de la lecture d'un print");
+          return 1;
+        }
+        debug_log(print.question);
+
 
         break;
 
       default: break;
     } 
 
-      
+    if (qCount == nQues) break;
+
     cbreak;
     keypad(stdscr, TRUE);
 
   } while ((ch = getch()) != 'q' );
-  
+
+
+  initWin(questwin, buttonList, print, BH, BW, nAns);
+
+  while (1) {
+    if (ch = getch() == 'q') break;
+  }
+
   check = close(toPrintPipe);
   int_log("le père à fermé le print : ", check);
   close(statePipe);

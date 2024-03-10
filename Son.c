@@ -4,9 +4,6 @@ void mainSon(int* mainMem, int nQues) {
 
   debug_log("début du fils");
 
-  int toPrintPipe;
-  int statePipe;
-  int resultPipe;
   //key_t key = ftok(const char ".", int "SysDexTpNote");
   //int mainMem_v = shmget(key_t key, size_t 1024, IPC_CREAT | 0666);
   //int* mainMem = shmat(int mainMem_v, const void NULL, int 0);
@@ -108,14 +105,21 @@ void mainSon(int* mainMem, int nQues) {
   
   int victory;
   int state = -1;
-  int check;
-  
+  int check = 0;
+  int score = 0;
 
-  resultPipe = open(PIPE_RES, O_WRONLY);
+
+  int toPrintPipe = open(PIPE_PRINT, O_WRONLY);
+  int_log("le fils à ouvert le print: ", toPrintPipe); 
+  int statePipe = open(PIPE_STATE, O_RDONLY);
+  int_log("le fils ouvre le state : ", statePipe); 
+  int resultPipe = open(PIPE_RES, O_WRONLY);
   int_log("le fils ouvre le result : ", resultPipe);
-  toPrintPipe = open(PIPE_PRINT, O_WRONLY);
-  int_log("le fils à ouvert le print: ", toPrintPipe);
-  int_log("le fils ouvre le state : ", statePipe = open(PIPE_STATE, O_RDONLY));
+ 
+  if (resultPipe == -1 || statePipe == -1 || toPrintPipe == -1) {
+    printf("erreur d'ouverture de 1/plusieurs pipes\n");
+    return 1;
+  }
 
   for (int actualQuestion = 0; actualQuestion<nQues; ++actualQuestion) {
 
@@ -129,30 +133,30 @@ void mainSon(int* mainMem, int nQues) {
     debug_log(printList[actualQuestion].question);
 
     while (1) {
-      usleep(100000);
       debug_log("début de la boucle du fils");
     
       //lire l'état actuel
       check = read(statePipe, &state, sizeof(int));
-      int_log("le fils lit le state : ", check);
-    
+      int_log("le fils lit le state : ", check); //blocant
+      if (check == 0) {
+        debug_log("erreur dans la lecture du state, state fermé ?");
+        break;
+      } 
+
       if (state == printList[actualQuestion].goodState) {
         //ecrire Victoire
         victory = 1;
-        state = -1;
       }
       else {
         victory = 0;
-        state = -1;
       }
 
       if (state != -1) {
         
         check = write(resultPipe, &victory, sizeof(int));
+        score += victory;
         int_log("le fils écrit le result : ", check);
-
-        check = write(statePipe, &state, sizeof(int));
-        int_log("le fils ecrit le state : ", check);
+        state = -1;
 
         break;
 
@@ -161,6 +165,21 @@ void mainSon(int* mainMem, int nQues) {
     debug_log("le fils est sorti de la boucle while");
   }
   debug_log("le fils est sorti de la boucle for");
+
+  debug_log("le fils écrit");
+  //ecrire le score à afficher
+  ToPrint printScore;
+  printScore.question = "votre score est de : WIP";
+  printScore.answer1 = "appuyez sur q pour quitter";
+  printScore.answer2 = "";
+  printScore.answer3 = "";
+  printScore.answer4 = "";
+  check = write(toPrintPipe, &printScore, sizeof(ToPrint));
+  int_log("le fils à écrit le print: ", check);
+
+  debug_log("le fils finit d'écrire");
+
+
   close(toPrintPipe);
   close(statePipe);
   close(resultPipe);

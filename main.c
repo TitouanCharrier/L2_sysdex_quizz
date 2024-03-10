@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
   box(mainwin, 0, 0); 
 
 
-  mainFather(mainwin, HEIGHT, WIDTH, 10, nAns, 0);
+  mainFather(mainwin, HEIGHT, WIDTH, nQues, nAns, 0);
  
   //------------------------------------ Fin de la mise en page ncurses --------------------------
  
