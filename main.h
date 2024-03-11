@@ -28,5 +28,5 @@ typedef struct ToPrint {
 } ToPrint;
 
 void mainFather(int nQues, int nAns);
-void mainSon( int* mainMem, int nQues);
+void mainSon(int nQues);
 

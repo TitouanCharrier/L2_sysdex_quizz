@@ -36,5 +36,5 @@ vous pouvez utiliser les arguments :
  -h afficher l'aide
  -r afficher les règles
  -s afficher les créateurs
- -a définir le nombre de réponses [2~4]
- -q définir le nombre de questions [4~10]
+ -a définir le nombre de réponses [2 - 4]
+ -q définir le nombre de questions [4 - 10]

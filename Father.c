@@ -103,12 +103,12 @@ char* getScore() {
   int status, cle = 5;
 
   if(( status = shmget(cle, sizeof(int), 0))==-1) {
-    printf("shm2.shmget: %s\n", strerror(errno));
+    debug_log(strerror(errno));
     exit(1);
   }
 
   if(( adr2 =(char*) shmat(status, NULL, 0)) == (char*)-1){
-    printf("shm2.shmat: %s\n", strerror(errno));
+    debug_log(strerror(errno));
     exit(1);
   }
 
@@ -118,16 +118,24 @@ char* getScore() {
   debug_log(scoreboard);
   
   if(shmdt(adr2) == -1) {
-    printf("shm2.shmdt: %s\n", strerror(errno));
+    debug_log(strerror(errno));
     exit(1);
   }
 
   if(shmctl(status, IPC_RMID, NULL) == -1) {
-    printf("shm2.shmctl: %s\n", strerror(errno));
+    debug_log(strerror(errno));
     exit(1);
   }
 
   return scoreboard;
+}
+
+void sigHandlerV(int signal) {
+  system("./finalV");
+}
+
+void sigHandlerD(int signal) {
+  system("./finalD");
 }
 
 // Fonction principale du père
@@ -190,7 +198,6 @@ void mainFather(int nQues, int nAns) {
   //------------------------------- initialisation des variables ---------------------------------
   int check = 0;
   int state = 1;
-  int state_old = 1;
   int actualResult = 0;
   int ch = -1;
   int qCount = 0;
@@ -203,6 +210,9 @@ void mainFather(int nQues, int nAns) {
   print.answer3 = "answer erreur";
   print.answer4 = "answer erreur";
   print.goodState = 1;
+
+  signal(SIGUSR1, sigHandlerV);
+  signal(SIGUSR2, sigHandlerD);
   
   //------------------------------ Début de la boucle principale ---------------------------------
   do {
@@ -219,16 +229,12 @@ void mainFather(int nQues, int nAns) {
     initWin(listWin, print, BH, BW, nAns, state);
     refresh();
     
-    // Stocker les éléments du toPrint
-    char* listAttribute[4] = {print.answer1, print.answer2, print.answer3, print.answer4};
-    
     // Prise en compte des touche préssées
     switch (ch) {
  
       case KEY_RIGHT : //séléctionner la réponse suivante
         debug_log("flèche droite enfoncé");
         if (state < nAns) {
-          state_old = state;
           state ++;
           initWin(listWin, print, BH, BW, nAns, state);
           refresh();
@@ -238,7 +244,6 @@ void mainFather(int nQues, int nAns) {
       case KEY_LEFT : //séléctionner la réponse précédente
         debug_log("flèche gauche enfoncé");
         if (state > 1) {
-          state_old = state;
           state --;
           initWin(listWin, print, BH, BW, nAns, state);
           refresh();
@@ -259,7 +264,6 @@ void mainFather(int nQues, int nAns) {
         resultWin(listWin, BH, BW, actualResult); 
         refresh();
 
-        //passage a la question suivante 
         qCount ++;
         
         // Prise en charge de la fin du jeu
@@ -267,7 +271,7 @@ void mainFather(int nQues, int nAns) {
           getch();
           debug_log("starting to get score");
           char* score = malloc(500*sizeof(char));
-          usleep(500000);
+          usleep(50000);
           score = getScore();
           debug_log("score given");
           debug_log(score);
@@ -275,7 +279,7 @@ void mainFather(int nQues, int nAns) {
           //affichage de l'écran de fin
           initquitWin(listWin, score, BH, BW); 
           refresh();
-          getch();
+          sleep(2);
           goto END;
         }
         
@@ -286,7 +290,7 @@ void mainFather(int nQues, int nAns) {
 
         if (check == 0) {
           debug_log("erreur lors de la lecture d'un print");
-          return 1;
+          return;
         }
 
         debug_log(print.question);
@@ -295,18 +299,26 @@ void mainFather(int nQues, int nAns) {
       default: break;
     } 
 
-    cbreak;
     keypad(stdscr, TRUE);
 
   } while ((ch = getch()) != 'q' );
   
 END:
 
-  check = close(toPrintPipe);
-  int_log("le père à fermé le print : ", check);
+
+  endwin();
+
+
+   
+  write(statePipe, &state, sizeof(int));
+  close(toPrintPipe);
   close(statePipe);
   close(resultPipe);
 
-  endwin();
-   
+  debug_log("wait for signal");
+  usleep(50000);
+
+  exit(0);
+  
+
 }

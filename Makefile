@@ -29,7 +29,13 @@ $(PROG_NAME): $(OBJS)
 	$(CC) $(OBJS) -o $(PROG_NAME) $(LDFLAGS)
 	rm -f debug.log ./pipefolder/pipe_res ./pipefolder/pipe_print ./pipefolder/pipe_state
 
+ext:
+	gcc finalV.c -o finalV
+	gcc finalD.c -o finalD
+
 
 # Nettoyage des fichiers intermédiaires et de l'exécutable
 clean:
 	rm -f $(OBJS) $(PROG_NAME)
+
+

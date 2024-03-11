@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
   // Code du fils
   else if (filsPid == 0) {
     // appel de la fonction mainson décrite dans Son.c
-    mainSon( 0, nQues); 
+    mainSon(nQues); 
   } 
 
   //Code du père

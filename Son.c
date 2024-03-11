@@ -1,8 +1,10 @@
 #include "main.h"
 
-void mainSon(int* mainMem, int nQues) {
+void mainSon(int nQues) {
 
   debug_log("début du fils");
+
+  //------------------------- Initialisation des questions ---------------------------------------
 
   ToPrint printList[10];
   
@@ -98,12 +100,15 @@ void mainSon(int* mainMem, int nQues) {
 
   debug_log("le fils est initialisé");
   int_log("le fils a reçu l'ordre d'éxécuter le nombre de questions", nQues);
+
+  //------------------------------ Déclaration des variables ------------------------------------- 
   
   int victory;
   int state = -1;
   int check = 0;
   int score = 0;
 
+  //--------------------------------- Ouverture des pipes ----------------------------------------
 
   int toPrintPipe = open(PIPE_PRINT, O_WRONLY);
   int_log("le fils à ouvert le print: ", toPrintPipe); 
@@ -113,10 +118,13 @@ void mainSon(int* mainMem, int nQues) {
   int_log("le fils ouvre le result : ", resultPipe);
  
   if (resultPipe == -1 || statePipe == -1 || toPrintPipe == -1) {
-    printf("erreur d'ouverture de 1/plusieurs pipes\n");
-    return 1;
+    debug_log("erreur d'ouverture de 1/plusieurs pipes\n");
+    return;
   }
 
+  //--------------------------- Début de la boucle principale ------------------------------------
+  
+  // Cette boucle fait une itération par question, change le texte a afficher
   for (int actualQuestion = 0; actualQuestion<nQues; ++actualQuestion) {
 
     int_log("le fils execute la question numéro : ", actualQuestion);
@@ -124,10 +132,9 @@ void mainSon(int* mainMem, int nQues) {
     //ecrire la question à afficher
     check = write(toPrintPipe, &printList[actualQuestion], sizeof(ToPrint));
     int_log("le fils à écrit le print: ", check);
-
-    debug_log("le fils finit d'écrire");
     debug_log(printList[actualQuestion].question);
-
+    
+    //cette boucle lit le state et agit lorsqu'une réponse est envoyée
     while (1) {
       debug_log("début de la boucle du fils");
     
@@ -163,18 +170,20 @@ void mainSon(int* mainMem, int nQues) {
   debug_log("le fils est sorti de la boucle for");
 
   //ecrire le score à afficher
+  
+  //----------------------------------- Initialisation de la shm ---------------------------------
 
   char* adr1;
   int status, cle = 5;
 
   if(( status = shmget(cle, 500*sizeof(char),
     IPC_CREAT|IPC_EXCL|0600))==-1) {
-    printf("shm1.shmget: %s\n", strerror(errno));
+    debug_log(strerror(errno));
     exit(1);
   }
 
   if(( adr1 =(char*) shmat(status, NULL, 0)) == (char*)-1){
-    printf("shm1.shmat: %s\n", strerror(errno));
+    debug_log(strerror(errno));
     exit(1);
   }
   debug_log("le fils écrit dans l'adresse");
@@ -184,11 +193,32 @@ void mainSon(int* mainMem, int nQues) {
 
 
   if(shmdt(adr1) == -1) {
-  printf("shm1.shmdt: %s\n", strerror(errno));
+  debug_log(strerror(errno));
   exit(1);
   }
 
   debug_log("le fils a bien ecrit la shm");
+
+ 
+ 
+  debug_log("attendre le père");
+  check = read(statePipe, &state, sizeof(int));
+  
+  if (score * 2 >= nQues) {
+    if (kill(getppid(), SIGUSR1) == -1) {
+      debug_log("echec de l'envoie du signal");
+      return;
+    }
+  }
+
+  else {
+    if (kill(getppid(), SIGUSR2) == -1) {
+      debug_log("echec de l'envoie du signal");
+      return;
+    }
+  }
+
+
 
 
   close(toPrintPipe);
@@ -196,5 +226,6 @@ void mainSon(int* mainMem, int nQues) {
   close(resultPipe);
 
   debug_log("Fin du Fils ------------------------------------");
+  exit(0);
 }
 
