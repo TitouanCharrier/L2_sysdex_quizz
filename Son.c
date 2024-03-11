@@ -92,7 +92,7 @@ void mainSon(int* mainMem, int nQues) {
   printList[8] = print9;
 
   ToPrint print10;
-  print10.question = "Quel est l'organe principal du système respiratoire ?";
+  print10.question = "Quel est l'organe pour respirer ?";
   print10.answer1 = "Le cœur";
   print10.answer2 = "Les poumons";
   print10.answer3 = "Le foie";
@@ -166,22 +166,39 @@ void mainSon(int* mainMem, int nQues) {
   }
   debug_log("le fils est sorti de la boucle for");
 
-  debug_log("le fils écrit");
   //ecrire le score à afficher
-  ToPrint printScore;
-  printScore.question = "votre score est de : WIP";
-  printScore.answer1 = "appuyez sur q pour quitter";
-  printScore.answer2 = "";
-  printScore.answer3 = "";
-  printScore.answer4 = "";
-  check = write(toPrintPipe, &printScore, sizeof(ToPrint));
-  int_log("le fils à écrit le print: ", check);
 
-  debug_log("le fils finit d'écrire");
+  char* adr1;
+  int status, cle = 5;
+
+  if(( status = shmget(cle, 500*sizeof(char),
+    IPC_CREAT|IPC_EXCL|0600))==-1) {
+    printf("shm1.shmget: %s\n", strerror(errno));
+    exit(1);
+  }
+
+  if(( adr1 =(char*) shmat(status, NULL, 0)) == (char*)-1){
+    printf("shm1.shmat: %s\n", strerror(errno));
+    exit(1);
+  }
+  debug_log("le fils écrit dans l'adresse");
+
+  sprintf(adr1,"%d / 10 ", score); 
+  debug_log(adr1);
+
+
+  if(shmdt(adr1) == -1) {
+  printf("shm1.shmdt: %s\n", strerror(errno));
+  exit(1);
+  }
+
+  debug_log("le fils a bien ecrit la shm");
 
 
   close(toPrintPipe);
   close(statePipe);
   close(resultPipe);
+
+  debug_log("Fin du Fils ------------------------------------");
 }
 

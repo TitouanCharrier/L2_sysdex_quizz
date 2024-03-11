@@ -98,23 +98,9 @@ int main(int argc, char *argv[]) {
   else {
   debug_log("Début du père");  
   // ----------------------------------- Début de la mise en page ncurses -------------------------
-  // initialisation de la fenetre
-  initscr();
-  
-  //supression du curseur et de l'affichage des touches
-  noecho();
-  curs_set(0);
-    
-  //calcul des bords de l'écran et 
-  int HEIGHT, WIDTH;
-  getmaxyx(stdscr, HEIGHT, WIDTH);
-  
-  // Définition de la fenetre principale
-  WINDOW* mainwin = newwin(HEIGHT -1, WIDTH -1, 1, 1);
-  box(mainwin, 0, 0); 
 
 
-  mainFather(mainwin, HEIGHT, WIDTH, nQues, nAns, 0);
+  mainFather(nQues, nAns);
  
   //------------------------------------ Fin de la mise en page ncurses --------------------------
  

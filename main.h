@@ -27,6 +27,6 @@ typedef struct ToPrint {
   int goodState;
 } ToPrint;
 
-void mainFather(WINDOW* mainwin, int HEIGHT, int WIDTH, int nQues, int nAns, int* mainMem);
+void mainFather(int nQues, int nAns);
 void mainSon( int* mainMem, int nQues);
 
