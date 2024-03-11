@@ -22,10 +22,10 @@ void mainSon(int* mainMem, int nQues) {
   ToPrint print2;
   print2.question = "Quel est le plus grand océan ?";
   print2.answer1 = "Atlantique";
-  print2.answer2 = "Indien";
-  print2.answer3 = "Pacifique";
+  print2.answer2 = "Pacifique";
+  print2.answer3 = "Indien";
   print2.answer4 = "Arctique";
-  print2.goodState = 3;
+  print2.goodState = 2;
   printList[1] = print2;
 
   ToPrint print3;
@@ -58,10 +58,10 @@ void mainSon(int* mainMem, int nQues) {
   ToPrint print6;
   print6.question = "Combien de continents y a-t-il sur Terre ?";
   print6.answer1 = "4";
-  print6.answer2 = "6";
-  print6.answer3 = "7";
+  print6.answer2 = "7";
+  print6.answer3 = "6";
   print6.answer4 = "9";
-  print6.goodState = 3;
+  print6.goodState = 2;
   printList[5] = print6;
 
   ToPrint print7;
@@ -75,20 +75,20 @@ void mainSon(int* mainMem, int nQues) {
 
   ToPrint print8;
   print8.question = "Qui a peint 'La Joconde' ?";
-  print8.answer1 = "Pablo Picasso";
-  print8.answer2 = "Vincent van Gogh";
-  print8.answer3 = "Leonardo da Vinci";
+  print8.answer1 = "Leonardo da Vinci";
+  print8.answer2 = "Pablo Picasso";
+  print8.answer3 = "Vincent van Gogh";
   print8.answer4 = "Raphael";
-  print8.goodState = 3;
+  print8.goodState = 1;
   printList[7] = print8;
 
   ToPrint print9;
   print9.question = "Quel est le plus long fleuve du monde ?";
   print9.answer1 = "Nil";
-  print9.answer2 = "Mississippi";
-  print9.answer3 = "Amazone";
+  print9.answer2 = "Amazone";
+  print9.answer3 = "Mississippi";
   print9.answer4 = "Yangtsé";
-  print9.goodState = 3;
+  print9.goodState = 2;
   printList[8] = print9;
 
   ToPrint print10;
