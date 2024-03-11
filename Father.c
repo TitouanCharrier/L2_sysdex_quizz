@@ -2,7 +2,9 @@
 
 #include <stdio.h>
 
-// fonction de débug générée par ia
+// fonction de débug générée par ia 
+// génère un fichier de débug appelé debug.log
+// le fichier contient l'historique des événements
 void int_log(const char *message, int value) {
     FILE *file = fopen("debug.log", "a"); // Ouvre le fichier en mode write
     if (file != NULL) {
@@ -17,7 +19,9 @@ void debug_log(const char* message) {
   int_log(message, -100);
 }
 
-// Fonction pour changer la couleur du texte d'un bouton
+// Fonction principale d'affichage et de modification des boutons
+// en Ncurses les boutons sont des fenètres avec un contour appelé "box"
+// cette fonction prend une fenètre en entrée et en réécrit le contenu
 void drawButton(WINDOW* buttonwin, char* text, int BH, int BW, int reverse) {
     wclear(buttonwin);
     box(buttonwin, 0, 0);
@@ -30,6 +34,8 @@ void drawButton(WINDOW* buttonwin, char* text, int BH, int BW, int reverse) {
     wrefresh(buttonwin);
 }
 
+// Fonction de mise a jour des fenètres
+// prends une liste de fenètres en entrée, affiche la question et met a jour les réponses
 void initWin(WINDOW* listWin[], ToPrint print, int BH, int BW, int nAns, int state) {
   
   wclear(listWin[4]);
@@ -49,6 +55,8 @@ void initWin(WINDOW* listWin[], ToPrint print, int BH, int BW, int nAns, int sta
   }
 }
 
+// Fonction d'appel de la fenètre de définition
+// efface les fenètres précédentes et modifie questwin
 void initquitWin(WINDOW* listWin[], char* score, int BH, int BW) {
   
   debug_log("entrée dans initquitWin");
@@ -65,6 +73,8 @@ void initquitWin(WINDOW* listWin[], char* score, int BH, int BW) {
   }
 }
 
+// Fonction d'affichage du résultat temporaire
+// Efface le contenu de questwin et le remplace par le text adapté
 void resultWin(WINDOW* listWin[], int BH, int BW, bool result) {
   wclear(listWin[4]);
   box(listWin[4], 0, 0);
@@ -85,8 +95,9 @@ void resultWin(WINDOW* listWin[], int BH, int BW, bool result) {
   
 }
 
+// Fonction de lecture du score dans la shm
+// lit le score et retourne sous la forme d'un string
 char* getScore() {
-  
   char* scoreboard = malloc(500*sizeof(char));
   char* adr2;
   int status, cle = 5;
@@ -119,31 +130,36 @@ char* getScore() {
   return scoreboard;
 }
 
+// Fonction principale du père
+// Est en charge de l'initialisation et de l'actualisation
+// des fenètres ncurses en fonction des données contenu
+// dans le ToPrint envoyé par le fils
 void mainFather(int nQues, int nAns) {  
 
-   // initialisation de Ncurses -------------------------------------------------------------------
+  //-------------------------------- initialisation de Ncurses ----------------------------------
   
-  // initialisation de la fenetre
+  // initialisation de l'écran
   initscr();
   
   //supression du curseur et de l'affichage des touches
   noecho();
   curs_set(0);
     
-  //calcul des bords de l'écran et 
+  //calcul des bords de l'écran
   int HEIGHT, WIDTH;
   getmaxyx(stdscr, HEIGHT, WIDTH);
   
   // Définition de la fenetre principale
   WINDOW* mainwin = newwin(HEIGHT -1, WIDTH -1, 1, 1);
 
+  // Définition des couleurs
   start_color(); 
   init_pair(1, COLOR_WHITE, COLOR_BLACK);
   init_pair(2, COLOR_BLUE, COLOR_BLACK);
   init_pair(3, COLOR_GREEN, COLOR_BLACK);
   init_pair(4, COLOR_RED, COLOR_BLACK);
 
- 
+  // Définition des tailles 
   int BH = HEIGHT/10; //Button Height
   int BW = WIDTH/3; //Button Width
   int AW = WIDTH/3; //Answer Width
@@ -158,13 +174,12 @@ void mainFather(int nQues, int nAns) {
 
   WINDOW* listWin[6] = {buttonA, buttonB, buttonC, buttonD, questwin, mainwin};
   
-  
+  // Définition du fond
   bkgd(COLOR_PAIR(2));
-  box(mainwin, 0, 0); 
   wrefresh(mainwin);
   refresh();
   
-  // initialisation des Pipes --------------------------------------------------------------------
+  //--------------------------------- initialisation des Pipes -----------------------------------
   int toPrintPipe = open(PIPE_PRINT, O_RDONLY);
   int_log("le père à ouvert le print : ", toPrintPipe);
   int statePipe = open(PIPE_STATE, O_WRONLY);
@@ -172,11 +187,13 @@ void mainFather(int nQues, int nAns) {
   int resultPipe = open(PIPE_RES, O_RDONLY);
   int_log("le père à ouvert le result : ", toPrintPipe);
 
-  // initialisation des variables ----------------------------------------------------------------
+  //------------------------------- initialisation des variables ---------------------------------
   int check = 0;
   int state = 1;
   int state_old = 1;
   int actualResult = 0;
+  int ch = -1;
+  int qCount = 0;
 
   //initialisation de print et prise en compte d'un défaut de chargment du fils
   ToPrint print;
@@ -187,10 +204,7 @@ void mainFather(int nQues, int nAns) {
   print.answer4 = "answer erreur";
   print.goodState = 1;
   
-  int ch = -1;
-  int qCount = 0;
-  
-  //Début de la boucle principale ----------------------------------------------------------------
+  //------------------------------ Début de la boucle principale ---------------------------------
   do {
     
     if (ch == -1) { //lire le print
@@ -200,15 +214,18 @@ void mainFather(int nQues, int nAns) {
       debug_log(print.question);
 
     }      
-
+    
+    // Rafraichir la fenetre
     initWin(listWin, print, BH, BW, nAns, state);
     refresh();
-
+    
+    // Stocker les éléments du toPrint
     char* listAttribute[4] = {print.answer1, print.answer2, print.answer3, print.answer4};
-
+    
+    // Prise en compte des touche préssées
     switch (ch) {
  
-      case KEY_RIGHT :
+      case KEY_RIGHT : //séléctionner la réponse suivante
         debug_log("flèche droite enfoncé");
         if (state < nAns) {
           state_old = state;
@@ -218,7 +235,7 @@ void mainFather(int nQues, int nAns) {
         }
         break;
 
-      case KEY_LEFT :
+      case KEY_LEFT : //séléctionner la réponse précédente
         debug_log("flèche gauche enfoncé");
         if (state > 1) {
           state_old = state;
@@ -228,7 +245,7 @@ void mainFather(int nQues, int nAns) {
         }
         break;
       
-      case '\n' :
+      case '\n' : //Envoyer la répose séléctionné au fils
         debug_log("Entrée enfoncé");
         //envoyer la réponse dans le tube state 
         check = write(statePipe, &state, sizeof(int));
@@ -237,13 +254,15 @@ void mainFather(int nQues, int nAns) {
         //lire la fenetre a afficher
         check = read(resultPipe, &actualResult, sizeof(int)); //bloquant
         int_log("le père lit le result : ", check); 
-
+        
+        // Afficher la fenètre résultat
         resultWin(listWin, BH, BW, actualResult); 
         refresh();
 
         //passage a la question suivante 
         qCount ++;
-       
+        
+        // Prise en charge de la fin du jeu
         if (qCount == nQues) {
           getch();
           debug_log("starting to get score");
@@ -252,26 +271,29 @@ void mainFather(int nQues, int nAns) {
           score = getScore();
           debug_log("score given");
           debug_log(score);
+
+          //affichage de l'écran de fin
           initquitWin(listWin, score, BH, BW); 
           refresh();
           getch();
           goto END;
         }
+        
+        //lecture de la question suivante
         debug_log("lecture du print par le père lors de Entrée");
         check = read(toPrintPipe, &print, sizeof(ToPrint));
         int_log("le père à lu le print lors de Entrée: ", check);
+
         if (check == 0) {
           debug_log("erreur lors de la lecture d'un print");
           return 1;
         }
+
         debug_log(print.question);
-
-
         break;
 
       default: break;
     } 
-
 
     cbreak;
     keypad(stdscr, TRUE);

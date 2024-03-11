@@ -1,81 +1,76 @@
 #include "main.h"
 
+void displayHelp() {
+  printf("Usage: ./quiz [OPTIONS]...\n Quiz game via IPC.\n\n");
+  printf("Options:\n"); 
+  printf("\t-h, --help display this help and exit\n"); 
+  printf("\t-r, --rules display the rules of the game\n");
+  printf("\t-s, --student display the name of the students who implemented the game\n");
+  printf("\t-a, --answers set the number of possible answers (by default 2, max 4)\n");
+  printf("\t-q, --questions set the number of questions in the quiz (by default 4, max 10)\n");
+}
+
 int main(int argc, char *argv[]) {
 
   //Permet l'utilisation de caractères UTF-8
   setlocale(LC_ALL, "fr_FR.UTF-8");
   
+  //---------------------------------- Prise en compte des arguments ------------------------------
 
   //Définition des variables principales
-  int nQues= 10;
+  int nQues = 4;
   int nAns = 2;
-  int check;
-  
+  int opt = 0; 
   debug_log("début du programme ----------------------------------------------------------------");
 
-  check = mkfifo(PIPE_PRINT, 0666);
+   
+  while ((opt = getopt(argc, argv, "hrsq:a:")) != -1) {
+    debug_log("enter the while arg");
+    int_log("arg is : ", opt);
+    switch (opt) {
+      case 'h' :
+        displayHelp();
+        return 0;
+    
+      case 'r' :
+        
+        printf("Use [righ arrow] and [left arrow] to select the right answer\n");
+        printf("then press [ENTER]\n");
+        printf("your result is printed and you can press any key except [ENTER]\n");
+        printf("to get the next question\n");
+        printf("Quit using [q]\n");
+        return 0;
+    
+      case 's' :
+        printf("Work done by Alexy Bechade and Titouan Charrier (AKA les meilleurs)\n");
+        return 0;
+
+      case 'a' :
+        nAns = atoi(optarg);
+        break;
+
+      case 'q':
+        nQues = atoi(optarg);
+
+    }
+
+  }
+  
+  if (nQues < 4 || nQues > 10 || nAns < 2 || nAns > 4) {
+    displayHelp();
+    return 0;
+  }
+
+  //---------------------------------- Définition des pipes --------------------------------------
+
+  int check = mkfifo(PIPE_PRINT, 0666);
   int_log("Print Pipe initialisé :", check);
   check = mkfifo(PIPE_STATE, 0666);
   int_log("State Pipe initialisé :", check);
   check = mkfifo(PIPE_RES, 0666);
   int_log("Res Pipe initialisé :", check);
-   
-  //fonction de débug
-  for (int i=0; i<argc; ++i) {
-    printf("argv %d = %s\n", i, argv[i]);
-  }
-   
-  //affichage de l'aide et prise en compte du -h
-  if (argc == 1 ) {
-  }
 
-  else if (argv[1][1] == 'r') {
-    printf("Ceci est un quizz, répondez bien à la question, gagnez un point, sinon 0\n");
-    return 0;
-  }
-
-  else if (argv[1][1] == 's') {
-    printf("Travail réalisé par Alexy Bechade et Titouan Charrier (AKA les meilleurs)\n");
-    return 0;
-  }
-
-  else if (argc == 2 && argv[1][1] == 'a') {
-    nAns = argv[1][2] - '0';
-    printf("nAns %d\n", nAns);
-  } 
-  
-  else if (argc == 2 && argv[1][1] == 'q') {
-    nQues = atoi(argv[1]+2*sizeof(char));
-    printf("nQues %d\n", nQues);
-
-  }
-
-  else if (argc == 3) {
-    if ( argv[2][1] == 'a') {
-      nAns = argv[2][2] - '0';
-      printf("nAns %d\n", nAns);
-    }
-
-    if ( argv[1][1] == 'a') {
-      nAns = argv[1][2] - '0';
-      printf("nAns %d\n", nAns);
-    }
-    
-    if (argv[1][1] == 'q') {
-    nQues = atoi(argv[1]+2*sizeof(char));
-    printf("nQues %d\n", nQues);
-    }
-    
-    if (argv[2][1] == 'q') {
-    nQues = atoi(argv[2]+2*sizeof(char));
-    printf("nQues %d\n", nQues);
-    }
-  } 
-
-  else {
-    printf("Usage: ./quiz [OPTIONS]...\n Quiz game via IPC.\n\n Options:\n \t\t-h, --help display this help and exit\n \t\t-r, --rules display the rules of the game\n \t\t-s, --student display the name of the students who implemented the game\n \t\t-a, --answers set the number of possible answers (by default 2, max 4)\n \t\t-q, --questions set the number of questions in the quiz (by default 4, max 10)\n WARNING: 2 arguments max, args like -a and -q must be as follows :\n \t\t-a3 -q10\n");
-    return 0;
-  }
+  //-------------------------------- Création du processus fils ----------------------------------
 
   //initialisation du fork
   pid_t filsPid;
@@ -89,25 +84,16 @@ int main(int argc, char *argv[]) {
 
   // Code du fils
   else if (filsPid == 0) {
-
+    // appel de la fonction mainson décrite dans Son.c
     mainSon( 0, nQues); 
-
   } 
 
   //Code du père
   else {
-  debug_log("Début du père");  
-  // ----------------------------------- Début de la mise en page ncurses -------------------------
-
-
+  // appel de la fonction mainFather décrite dans Father.c
   mainFather(nQues, nAns);
- 
-  //------------------------------------ Fin de la mise en page ncurses --------------------------
- 
   }
 
   return 0;
-
-  return EXIT_SUCCESS;
 }
 

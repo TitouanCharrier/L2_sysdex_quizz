@@ -4,10 +4,6 @@ void mainSon(int* mainMem, int nQues) {
 
   debug_log("début du fils");
 
-  //key_t key = ftok(const char ".", int "SysDexTpNote");
-  //int mainMem_v = shmget(key_t key, size_t 1024, IPC_CREAT | 0666);
-  //int* mainMem = shmat(int mainMem_v, const void NULL, int 0);
-  
   ToPrint printList[10];
   
   ToPrint print1;
@@ -183,7 +179,7 @@ void mainSon(int* mainMem, int nQues) {
   }
   debug_log("le fils écrit dans l'adresse");
 
-  sprintf(adr1,"%d / 10 ", score); 
+  sprintf(adr1,"%d / %d ", score, nQues); 
   debug_log(adr1);
 
 

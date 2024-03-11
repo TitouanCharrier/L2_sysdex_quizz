@@ -1,6 +1,6 @@
 #généré en partie par chat-gpt
 # Nom du programme final
-PROG_NAME = main
+PROG_NAME = quiz
 
 # Compilateur
 CC = gcc
@@ -9,7 +9,7 @@ CC = gcc
 LDFLAGS = -lncurses
 
 # Options de compilation
-CFLAGS = -g -Wall -Wextra -std=c99
+CFLAGS = -g -Wall -Wextra -std=gnu99
 
 # Listes des fichiers sources
 SRCS = Father.c Son.c main.c
