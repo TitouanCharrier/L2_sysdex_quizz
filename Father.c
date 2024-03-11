@@ -130,11 +130,11 @@ char* getScore() {
   return scoreboard;
 }
 
-void sigHandlerV(int signal) {
+void sigHandlerV() {
   system("./finalV");
 }
 
-void sigHandlerD(int signal) {
+void sigHandlerD() {
   system("./finalD");
 }
 
@@ -270,7 +270,7 @@ void mainFather(int nQues, int nAns) {
         if (qCount == nQues) {
           getch();
           debug_log("starting to get score");
-          char* score = malloc(500*sizeof(char));
+          char* score = malloc(80*sizeof(char));
           usleep(50000);
           score = getScore();
           debug_log("score given");
@@ -280,6 +280,7 @@ void mainFather(int nQues, int nAns) {
           initquitWin(listWin, score, BH, BW); 
           refresh();
           sleep(2);
+          free(score);
           goto END;
         }
         
@@ -305,10 +306,7 @@ void mainFather(int nQues, int nAns) {
   
 END:
 
-
   endwin();
-
-
    
   write(statePipe, &state, sizeof(int));
   close(toPrintPipe);

@@ -29,4 +29,6 @@ typedef struct ToPrint {
 
 void mainFather(int nQues, int nAns);
 void mainSon(int nQues);
+void debug_log(const char* message);
+void int_log(const char *message, int value);
 

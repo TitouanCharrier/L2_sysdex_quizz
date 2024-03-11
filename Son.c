@@ -176,7 +176,7 @@ void mainSon(int nQues) {
   char* adr1;
   int status, cle = 5;
 
-  if(( status = shmget(cle, 500*sizeof(char),
+  if(( status = shmget(cle, 80*sizeof(char),
     IPC_CREAT|IPC_EXCL|0600))==-1) {
     debug_log(strerror(errno));
     exit(1);
@@ -198,9 +198,6 @@ void mainSon(int nQues) {
   }
 
   debug_log("le fils a bien ecrit la shm");
-
- 
- 
   debug_log("attendre le père");
   check = read(statePipe, &state, sizeof(int));
   
@@ -217,9 +214,6 @@ void mainSon(int nQues) {
       return;
     }
   }
-
-
-
 
   close(toPrintPipe);
   close(statePipe);
