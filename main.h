@@ -14,9 +14,9 @@
 #include <errno.h>
 
 #define PIPE_SIZE 1000
-#define PIPE_PRINT "./pipefolder/pipe_print"
-#define PIPE_STATE "./pipefolder/pipe_state"
-#define PIPE_RES   "./pipefolder/pipe_res"
+#define PIPE_PRINT "pipe_print"
+#define PIPE_STATE "pipe_state"
+#define PIPE_RES   "pipe_res"
 
 typedef struct ToPrint {
   char* question;
