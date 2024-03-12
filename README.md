@@ -26,7 +26,8 @@ $ sudo apt install libncurses5-dev libncursesw5-dev
 
 Après l'installation de NCurses, le programme se compile avec
 
-$ make
+$ make ext //compile les programmes externes de victoire et défaite
+$ make // compile le programme principale
 
 Vous pouvez également utiliser l'éxécutable fourni sous le nom de 
 
