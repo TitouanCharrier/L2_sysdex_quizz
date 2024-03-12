@@ -18,7 +18,7 @@ void mainSon(int nQues) {
   printList[0] = print1;
 
   ToPrint print2;
-  print2.question = "Quel est le plus grand océan ?";
+  print2.question = "Quel est le plus grand ocean ?";
   print2.answer1 = "Atlantique";
   print2.answer2 = "Pacifique";
   print2.answer3 = "Indien";
@@ -36,7 +36,7 @@ void mainSon(int nQues) {
   printList[2] = print3;
 
   ToPrint print4;
-  print4.question = "Quel est le plus grand désert du monde ?";
+  print4.question = "Quel est le plus grand desert du monde ?";
   print4.answer1 = "Sahara";
   print4.answer2 = "Atacama";
   print4.answer3 = "Gobi";
@@ -45,7 +45,7 @@ void mainSon(int nQues) {
   printList[3] = print4;
 
   ToPrint print5;
-  print5.question = "Qui a écrit 'Romeo et Juliette' ?";
+  print5.question = "Qui a ecrit 'Romeo et Juliette' ?";
   print5.answer1 = "William Shakespeare";
   print5.answer2 = "Victor Hugo";
   print5.answer3 = "Charles Dickens";
@@ -85,13 +85,13 @@ void mainSon(int nQues) {
   print9.answer1 = "Nil";
   print9.answer2 = "Amazone";
   print9.answer3 = "Mississippi";
-  print9.answer4 = "Yangtsé";
+  print9.answer4 = "Yangtse";
   print9.goodState = 2;
   printList[8] = print9;
 
   ToPrint print10;
   print10.question = "Quel est l'organe pour respirer ?";
-  print10.answer1 = "Le cœur";
+  print10.answer1 = "Le coeur";
   print10.answer2 = "Les poumons";
   print10.answer3 = "Le foie";
   print10.answer4 = "Le cerveau";
