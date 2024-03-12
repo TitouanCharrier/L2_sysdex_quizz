@@ -80,7 +80,7 @@ void resultWin(WINDOW* listWin[], int BH, int BW, bool result) {
   box(listWin[4], 0, 0);
   if (result) {
     wattron(listWin[4], COLOR_PAIR(3));
-    mvwprintw(listWin[4], 2*BH/2,  (3*BW)/4 -7 , "Féliciations !");
+    mvwprintw(listWin[4], 2*BH/2,  (3*BW)/4 -7 , "Feliciations !");
     wattroff(listWin[4], COLOR_PAIR(3));
   }
   else if (!result){
