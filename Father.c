@@ -27,7 +27,7 @@ void drawButton(WINDOW* buttonwin, char* text, int BH, int BW, int reverse) {
     box(buttonwin, 0, 0);
     if(reverse == 0) wattron(buttonwin, A_REVERSE);
     else wattron(buttonwin, COLOR_PAIR(1));
-    mvwprintw(buttonwin, 3*BH/2, BW/2 - (strlen(text)/2), text);
+    mvwprintw(buttonwin, 3 * BH / 2, BW / 2 - (strlen(text) / 2), text);
     if (reverse == 0) wattroff(buttonwin, A_REVERSE);
     else wattroff(buttonwin, COLOR_PAIR(1));
 
@@ -131,11 +131,14 @@ char* getScore() {
 }
 
 void sigHandlerV() {
-  system("./finalV");
+
+  char* args[] = {"./finalV", NULL};
+  execvp(args[0], args);
 }
 
 void sigHandlerD() {
-  system("./finalD");
+  char* args[] = {"./finalD", NULL};
+  execvp(args[0], args);
 }
 
 // Fonction principale du père
@@ -210,7 +213,8 @@ void mainFather(int nQues, int nAns) {
   print.answer3 = "answer erreur";
   print.answer4 = "answer erreur";
   print.goodState = 1;
-
+  
+  // Gestion des signaux
   signal(SIGUSR1, sigHandlerV);
   signal(SIGUSR2, sigHandlerD);
   
